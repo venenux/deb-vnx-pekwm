@@ -433,22 +433,7 @@ PDecor::resize(uint width, uint height)
         _child->resize(getChildWidth(), getChildHeight());
     }
 
-    // place / resize title and border
-    resizeTitle();
-    placeBorder();
-
-    // render title and border
-    _dirty_resized = true;
-
-    // Set and apply shape on window, all parts of the border can now
-    // be shaped.
-    setBorderShape();
-    applyBorderShape();
-
-    renderTitle();
-    renderBorder();
-
-    _dirty_resized = false;
+    resizeAndRenderDecor();
 }
 
 //! @brief Move and resize window.
@@ -484,6 +469,15 @@ PDecor::moveResize(int x, int y, uint width, uint height)
         alignChild(_child);
     }
 
+    resizeAndRenderDecor();
+}
+
+/**
+ * Resize and render decor title and border after resize.
+ */
+void
+PDecor::resizeAndRenderDecor(void)
+{
     // Place and resize title and border
     resizeTitle();
     placeBorder();

@@ -400,6 +400,8 @@ private:
     EdgeType doMoveEdgeFind(int x, int y);
     void doMoveEdgeAction(XMotionEvent *ev, EdgeType edge);
 
+    void resizeAndRenderDecor(void);
+
     void placeButtons(void);
     void placeBorder(void);
     void shapeBorder(void);
