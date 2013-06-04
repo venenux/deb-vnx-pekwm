@@ -2131,12 +2131,21 @@ Frame::handleConfigureRequestGeometry(XConfigureRequestEvent *ev, Client *client
         return;
     }
 
-    bool change_geometry = false;
+    bool geometry_changed =
+        (! client->isCfgDeny(CFG_DENY_SIZE) && (ev->value_mask & (CWWidth|CWHeight)))
+        || (! client->isCfgDeny(CFG_DENY_POSITION) && (ev->value_mask & (CWX|CWY)));
+    
+    // Remove fullscreen state if client changes it size. This needs
+    // to be done before configuring the client as it will update the
+    // size of the window to what it was before going to fullscreen mode.
+    if (geometry_changed && Config::instance()->isFullscreenDetect()) {
+        setStateFullscreen(STATE_UNSET);
+    }
+
     if (! client->isCfgDeny(CFG_DENY_SIZE)
         && (ev->value_mask & (CWWidth|CWHeight))) {
         resizeChild(ev->width, ev->height);
         applyBorderShape();
-        change_geometry = true;
     }
 
     if (! client->isCfgDeny(CFG_DENY_POSITION)
@@ -2144,12 +2153,6 @@ Frame::handleConfigureRequestGeometry(XConfigureRequestEvent *ev, Client *client
         calcGravityPosition(_client->getXSizeHints()->win_gravity,
                             ev->x, ev->y, _gm.x, _gm.y);
         move(_gm.x, _gm.y);
-        change_geometry = true;
-    }
-
-    // Remove fullscreen state if client changes it size
-    if (change_geometry && Config::instance()->isFullscreenDetect()) {
-        setStateFullscreen(STATE_UNSET);
     }
 }
 
