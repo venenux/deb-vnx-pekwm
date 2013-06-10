@@ -140,7 +140,7 @@ TextureHandler::parse(const std::string &texture)
     vector<string> tok;
 
     PTexture::Type type;
-    if (Util::splitString(texture, tok, " \t")) {
+    if (Util::splitString(texture, tok, " \t", 0, false, '\'')) {
         type = ParseUtil::getValue<PTexture::Type>(tok[0], _parse_map);
     } else {
         type = ParseUtil::getValue<PTexture::Type>(texture, _parse_map);

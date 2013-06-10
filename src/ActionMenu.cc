@@ -278,7 +278,8 @@ ActionMenu::getIcon(CfgParser::Entry *value)
     // that fails load is an scaled image.
     icon = TextureHandler::instance()->getTexture(value->get_value());
     if (! icon) {
-        icon = TextureHandler::instance()->getTexture("IMAGE " + value->get_value() + "#SCALED");
+        string image_texture = "IMAGE '" + Util::escapeChar(value->get_value(), '\'') + "#SCALED'";
+        icon = TextureHandler::instance()->getTexture(image_texture);
     }
 
     return icon;
