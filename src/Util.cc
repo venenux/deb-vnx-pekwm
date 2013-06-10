@@ -271,6 +271,14 @@ expandFileName(std::string &file)
     }
 }
 
+static inline void
+splitStringAddToken(const std::string &str, std::vector<std::string> &toks, bool include_empty)
+{
+    if (str.size() || include_empty) {
+        toks.push_back(str);
+    }
+}
+
 //! @brief Split the string str based on separator sep and put into vals
 //!
 //! This splits the string str into to max_tokens parts and puts in the vector
@@ -285,37 +293,47 @@ expandFileName(std::string &file)
 //! @param include_empty Include empty elements, defaults to false.
 //! @return Number of tokens inserted into vals
 uint
-splitString(const std::string str, std::vector<std::string> &toks, const char *sep, uint max, bool include_empty)
+splitString(const std::string &str, std::vector<std::string> &toks, const std::string &sep, uint max, bool include_empty, char quote)
 {
-    if (str.size() < 1) {
-        return 0;
-    }
-
     uint n = toks.size();
-    string::size_type s, e;
+    uint max_tokens = max ? toks.size() + max - 1: 0;
+    bool in_escape = false, in_quote = false;
+    ostringstream buf;
 
-    s = str.find_first_not_of(" \t\n");
-    for (uint i = 0; ((i < max) || (max == 0)) && (s != string::npos); ++i) {
-        e = str.find_first_of(sep, s);
-
-        if ((e != string::npos) && (i < (max - 1))) {
-            toks.push_back(str.substr(s, e - s));
-        } else if (s < str.size()) {
-            toks.push_back(str.substr(s, str.size() - s));
-            break;
-        } else {
-            break;
-        }
-
-        if (include_empty) {
-            s = str.find_first_of(sep, e + 1);
-            if (s != (e + 1)) {
-                s = str.find_first_not_of(sep, e);
+    string::const_iterator it(str.begin());
+    for (; it != str.end() && (! max_tokens || toks.size() < max_tokens); ++it) {
+        if (in_escape) {
+            // Escaped character
+            buf << *it;
+            in_escape = false;
+        } else if (quote != '\0' && *it == '\\') {
+            // Escape next character (if quoting is enabled)
+            in_escape = true;
+        } else if (quote != '\0' && *it == quote) {
+            if (in_quote) {
+                // New token from quote
+                splitStringAddToken(buf.str(), toks, include_empty);
+                buf.str("");
             }
+            in_quote = ! in_quote;
+        } else if (in_quote) {
+            // Ordinary character within quote
+            buf << *it;
+        } else if (sep.find(*it) != string::npos) {
+            // New token
+            splitStringAddToken(buf.str(), toks, include_empty);
+            buf.str("");
         } else {
-            s = str.find_first_not_of(sep, e);
+            // Ordinary character data
+            buf << *it;
         }
     }
+
+    // Add last token
+    for (; it != str.end(); ++it) {
+        buf << *it;
+    }
+    splitStringAddToken(buf.str(), toks, include_empty);
 
     return (toks.size() - n);
 }
