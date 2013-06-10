@@ -338,6 +338,26 @@ splitString(const std::string &str, std::vector<std::string> &toks, const std::s
     return (toks.size() - n);
 }
 
+/**
+ * Backslash escape character in string.
+ *
+ * \param str String to escape chr in.
+ * \param chr Character to escape in str.
+ * \return String with all occurances of chr \ escaped.
+ */
+std::string
+escapeChar(const std::string &str, const char chr)
+{
+    ostringstream buf;
+    for (string::const_iterator it(str.begin()); it != str.end(); ++it) {
+        if (*it == '\\' || *it == chr) {
+            buf << '\\';
+        }
+        buf << *it;
+    }
+    return buf.str();
+}
+
 //! @brief Converts wide-character string to multibyte version
 //! @param str String to convert.
 //! @return Returns multibyte version of string.
