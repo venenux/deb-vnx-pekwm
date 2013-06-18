@@ -30,6 +30,7 @@
 #include <locale>
 
 extern "C" {
+#include <locale.h>
 #include <unistd.h> // execlp
 }
 
@@ -81,9 +82,14 @@ main(int argc, char **argv)
     try {
         locale::global(locale(""));
     } catch (const std::runtime_error &e) {
-        ERR("The environment variables specify an unknown locale - "
-            "falling back to default \"C\". This is not a bug in PekWM.");
-        locale::global(locale("C"));
+        WARN("Failed to set the locale using locale::global - "
+             "falling back to setlocale.");
+        char *locale_used = setlocale(LC_CTYPE, "");
+        if (locale_used == NULL) {
+            ERR("The environment variables specify an unknown locale - "
+                "falling back to default \"C\". This is not a bug in PekWM.");
+            locale::global(locale("C"));
+        }
     }
 
     Util::iconv_init();
