@@ -81,7 +81,7 @@ public:
     static void setNames(void);
 
     static void setWorkspace(uint num, bool focus);
-    static bool gotoWorkspace(uint direction, bool warp);
+    static bool gotoWorkspace(uint direction, bool focus, bool warp);
 
     static Workspace &getActWorkspace(void) {
         return _workspaces[_active];
@@ -127,7 +127,7 @@ public:
 
 private:
     static Window *buildClientList(unsigned int &num_windows);
-    static bool warpToWorkspace(uint num, int dir);
+    static bool warpToWorkspace(uint num, int dir, bool focus);
 
     static std::wstring getWorkspaceName(uint num);
 

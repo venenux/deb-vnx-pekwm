@@ -285,7 +285,7 @@ ActionHandler::handleAction(const ActionPerformed &ap)
                 }
                 break;
             case ACTION_WARP_TO_WORKSPACE:
-                actionWarpToWorkspace(decor, it->getParamI(0));
+                actionWarpToWorkspace(decor, it->getParamI(0), it->getParamI(1));
                 break;
             default:
                 matched = false;
@@ -322,7 +322,8 @@ ActionHandler::handleAction(const ActionPerformed &ap)
                 // Events caused by a motion event ( dragging frame to
                 // the edge ) or enter event ( moving the pointer to
                 // the edge ) should warp the pointer.
-                actionGotoWorkspace(it->getParamI(0), (ap.type == MotionNotify) || (ap.type == EnterNotify));
+                Workspaces::gotoWorkspace(it->getParamI(0), it->getParamI(1),
+                                          (ap.type == MotionNotify) || (ap.type == EnterNotify));
                 break;
             case ACTION_FIND_CLIENT:
                 actionFindClient(Util::to_wide_str(it->getParamS()));
@@ -565,15 +566,6 @@ ActionHandler::actionFindClient(const std::wstring &title)
     }
 }
 
-//! @brief Goto workspace
-//! @param workspace Workspace to got to
-//! @param warp If true, warp pointer as well
-void
-ActionHandler::actionGotoWorkspace(uint workspace, bool warp)
-{
-    Workspaces::gotoWorkspace(workspace, warp);
-}
-
 //! @brief Focus client with id.
 //! @param id Client id.
 void
@@ -643,14 +635,14 @@ ActionHandler::actionSendToWorkspace(PDecor *decor, int direction)
 
 //! @brief
 void
-ActionHandler::actionWarpToWorkspace(PDecor *decor, uint direction)
+ActionHandler::actionWarpToWorkspace(PDecor *decor, uint direction, bool focus)
 {
     // Removing the already accumulated motion events can help
     // to avoid skipping workspaces (see task #77).
     X11::removeMotionEvents();
 
     // actually did move
-    if (Workspaces::gotoWorkspace(DirectionType(direction), true)) {
+    if (Workspaces::gotoWorkspace(DirectionType(direction), focus, true)) {
         int x, y;
         X11::getMousePosition(x, y);
 

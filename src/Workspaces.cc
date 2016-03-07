@@ -174,9 +174,8 @@ Workspaces::setWorkspace(uint num, bool focus)
     WindowManager::instance()->showWSIndicator();
 }
 
-//! @brief
 bool
-Workspaces::gotoWorkspace(uint direction, bool warp)
+Workspaces::gotoWorkspace(uint direction, bool focus, bool warp)
 {
     uint workspace;
     int dir = 0;
@@ -278,18 +277,17 @@ Workspaces::gotoWorkspace(uint direction, bool warp)
 
     if (switched) {
         if (warp) {
-            warpToWorkspace(workspace, dir);
+            warpToWorkspace(workspace, dir, focus);
         } else {
-            setWorkspace(workspace, true);
+            setWorkspace(workspace, focus);
         }
     }
 
     return switched;
 }
 
-//! @brief
 bool
-Workspaces::warpToWorkspace(uint num, int dir)
+Workspaces::warpToWorkspace(uint num, int dir, bool focus)
 {
     if (num == _active || num >= _workspaces.size()) {
         return false;
@@ -320,7 +318,7 @@ Workspaces::warpToWorkspace(uint num, int dir)
     }
 
     // set workpsace
-    setWorkspace(num, true);
+    setWorkspace(num, focus);
 
     return true;
 }

@@ -625,7 +625,7 @@
         </listitem>
       </varlistentry>
       <varlistentry>
-        <term>GotoWorkspace (string)</term>
+        <term>GotoWorkspace (string boolean)</term>
         <listitem>
           <para>
             Changes workspaces. String is one of:
@@ -705,6 +705,7 @@
                 </para>
               </listitem>
             </itemizedlist>
+            If boolean is false, do not focus previously focused window after changing workspace. Defaults to true.
         </para></listitem>
       </varlistentry>
       <varlistentry>
