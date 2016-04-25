@@ -484,6 +484,7 @@ Theme::PDecorData::checkColors(void)
 
 //! @brief PMenuData constructor
 Theme::PMenuData::PMenuData(void)
+    : _name("DEFAULT")
 {
     for (uint i = 0; i <= OBJECT_STATE_NO; ++i) {
         _font[i] = 0;
@@ -514,6 +515,10 @@ Theme::PMenuData::load(CfgParser::Entry *section)
     if (! section) {
         check();
         return false;
+    }
+
+    if (section->getValue().size() > 0) {
+        _name = section->getValue();
     }
 
     CfgParser::Entry *value;
@@ -998,8 +1003,32 @@ Theme::load(const std::string &dir)
         _pdecordata_map["DEFAULT"] = decor_data;
     }
 
-    if (! _menu_data.load(theme.getEntryRoot()->findSection("MENU"))) {
+    CfgParser::iterator it(theme.getEntryRoot()->begin());
+    for (; it != theme.getEntryRoot()->end(); ++it) {
+        if (!(*it)->getSection() || ! (*(*it) == "MENU")) {
+            continue;
+        }
+
+        Theme::PMenuData *data = new Theme::PMenuData();
+        if (data->load((*it)->getSection())) {
+            std::string mkey(data->getName());
+            Util::to_upper(mkey);
+
+            map<string, Theme::PMenuData*>::iterator m_it = _pmenudata_map.find(mkey);
+            if (m_it != _pmenudata_map.end()) {
+                delete m_it->second;
+                _pmenudata_map.erase(m_it);
+            }
+
+            _pmenudata_map[mkey] = data;
+        } else {
+            delete data;
+        }
+    }
+
+    if (! getMenuData("DEFAULT")) {
         WARN("Missing or malformed \"MENU\" section!");
+        _pmenudata_map["DEFAULT"] = new Theme::PMenuData();
     }
 
     if (! _status_data.load(theme.getEntryRoot()->findSection("STATUS"))) {
@@ -1063,7 +1092,12 @@ Theme::unload(void)
     _pdecordata_map.clear();
 
     // Unload theme data
-    _menu_data.unload();
+    map<string, Theme::PMenuData*>::iterator m_it(_pmenudata_map.begin());
+    for (; m_it != _pmenudata_map.end(); ++m_it) {
+        delete m_it->second;
+    }
+    _pmenudata_map.clear();
+
     _status_data.unload();
     _cmd_d_data.unload();
     _ws_indicator_data.unload();

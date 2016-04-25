@@ -17,6 +17,7 @@
 #include "Action.hh" // ActionEvent
 #include "PFont.hh" // PFont::Color
 #include "ParseUtil.hh"
+#include "Util.hh"
 
 class PTexture;
 class Button;
@@ -194,6 +195,8 @@ public:
         PMenuData(void);
         ~PMenuData(void);
 
+        inline const std::string &getName(void) const { return _name; }
+
         //! @brief Returns PFont used in ObjectState state.
         inline PFont *getFont(ObjectState state) { return _font[state]; }
         //! @brief Returns PFont::Color used in ObjectState state.
@@ -228,6 +231,7 @@ public:
         void loadState(CfgParser::Entry *cs, ObjectState state);
 
     private:
+        std::string _name;
         PFont *_font[OBJECT_STATE_NO + 1];
         PFont::Color *_color[OBJECT_STATE_NO + 1];
         PTexture *_tex_menu[OBJECT_STATE_NO + 1];
@@ -340,12 +344,21 @@ public:
         return 0;
     }
 
+    Theme::PMenuData *getMenuData(const std::string &name) {
+        std::string key(name);
+        Util::to_upper(key);
+
+        std::map<std::string, Theme::PMenuData*>::iterator it = _pmenudata_map.find(key);
+        if (it == _pmenudata_map.end()) {
+            return key == "DEFAULT" ? 0 : getMenuData("DEFAULT");
+        }
+
+        return it->second;
+    }
+
     Theme::WorkspaceIndicatorData &getWorkspaceIndicatorData(void) {
         return _ws_indicator_data;
     }
-
-    // menu
-    inline Theme::PMenuData *getMenuData(void) { return &_menu_data; }
 
     // status/cmd
     inline Theme::TextDialogData *getStatusData(void) { return &_status_data; }
@@ -366,7 +379,7 @@ private:
     std::map<std::string, Theme::PDecorData*> _pdecordata_map;
 
     // menu
-    Theme::PMenuData _menu_data;
+    std::map<std::string, Theme::PMenuData*> _pmenudata_map;
 
     HarbourData _harbour_data; /**< Data for styling harbour. */
 
